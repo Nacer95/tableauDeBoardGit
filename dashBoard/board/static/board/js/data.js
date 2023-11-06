@@ -34,7 +34,22 @@
 							//htmlOutput.innerHTML += sessionData[j]+ " "+sessionData[j].timestamp+"<br>"; // Affichage du statement dans la console
 							//console.log(sessionData[j]);
 						}
+
+						//*******************************************
+						// Gestion des données
+						// sessionData
+						//********************************************
 						console.log(sessionData.length)
+
+
+
+
+
+
+
+
+
+
 
 					}
 				}
