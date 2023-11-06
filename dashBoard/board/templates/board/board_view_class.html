@@ -1,0 +1,28 @@
+{% load static  %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="{% static 'board/js/lib_tincan.js' %}"></script>
+    <script type="text/javascript" src="{% static 'board/js/tincan.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'board/css/style.css' %}">
+</head>
+<body>
+  <div id="partie-haute">
+      <div id="partie-1">
+         <!-- <div id="result">
+            Chargement en cours...<br>
+          </div> -->
+            <a href="{% url 'classBoard' %}">
+                 board per class
+            </a>
+            <a href="{% url 'studentBoard' %}">
+                 board per student
+            </a>
+      </div>
+      <div id="partie-2-class">
+          {% include 'board/classSuccessLevels_stackedPercentageColumn.html' %}
+      </div>
+  </div>
+</body>
+</html>

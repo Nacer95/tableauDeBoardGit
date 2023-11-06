@@ -1,0 +1,57 @@
+{% load static  %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="{% static 'board/js/lib_tincan.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'board/css/style.css' %}">
+</head>
+<body>
+
+  <div id="partie-haute">
+          <div id="partie-1">
+              <div id="result">
+                <script type="text/javascript" src="{% static 'board/js/data.js' %}"></script>
+              </div>
+                <a href="{% url 'classBoard' %}">
+                     board per class
+                </a>
+                <a href="{% url 'studentBoard' %}">
+                     board per student
+                </a>
+        </div>
+        <div id="partie-2">
+            <div id="barre-recherche">
+                <input type="text" placeholder="Recherche...">
+                <button>other student</button>
+                <button>reset</button>
+                <button>add</button>
+            </div>
+            <div id="graphique">
+                {% include 'board/studentsMean_scatterPlot.html' %}
+
+            </div>
+        </div>
+        <div id="partie-3">
+            <div>Résilience de l'étudiant</div>
+            <div>Compétence à travailler </div>
+            <div>Barre de progression</div>
+        </div>
+      </div>
+    <div id="partie-basse">
+     <div id="graphe1_canvas">
+         <div class="graphique_container">
+             {% include  'board/studentsDifficultyCurve_column.html' %}
+
+        </div>
+     </div>
+     <div id="graphe2_canvas">
+         <div class="graphique_container">
+            {% include 'board/studentsCompetencesStudied_PolarRadar.html' %}
+        </div>
+     </div>
+  </div>
+
+</body>
+</html>
