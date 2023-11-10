@@ -73,8 +73,8 @@
 
 }
 
-#partie-3 div {
-    height: 20%;
+#partie-3 div.container_p3 {
+    height: 100px;
     width: 70%;
     padding: 10px;
     margin : 10px;

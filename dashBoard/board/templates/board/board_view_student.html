@@ -5,14 +5,13 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <script type="text/javascript" src="{% static 'board/js/lib_tincan.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'board/css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'board/css/style3.css' %}">
 </head>
 <body>
-
   <div id="partie-haute">
           <div id="partie-1">
               <div id="result">
-                <script type="text/javascript" src="{% static 'board/js/data.js' %}"></script>
+                <script type="text/javascript" src="{% static 'board/js/data2.js' %}"></script>
               </div>
                 <a href="{% url 'classBoard' %}">
                      board per class
@@ -23,27 +22,29 @@
         </div>
         <div id="partie-2">
             <div id="barre-recherche">
-                <input type="text" placeholder="Recherche...">
-                <button>other student</button>
+                <input type="text" placeholder="Recherche..." id="studentIdInput">
+                <button onclick="searchStudent()">search</button>
+                <button>students</button>
                 <button>reset</button>
                 <button>add</button>
             </div>
             <div id="graphique">
                 {% include 'board/studentsMean_scatterPlot.html' %}
-
             </div>
         </div>
         <div id="partie-3">
-            <div>Résilience de l'étudiant</div>
-            <div>Compétence à travailler </div>
-            <div>Barre de progression</div>
+            <div class="container_p3">Résilience de l'étudiant</div>
+            <div class="container_p3">Compétence à travailler </div>
+            <div class="container_p3">Barre de progression
+                <div id="barreDeProgression">
+                </div>
+            </div>
         </div>
       </div>
     <div id="partie-basse">
      <div id="graphe1_canvas">
          <div class="graphique_container">
              {% include  'board/studentsDifficultyCurve_column.html' %}
-
         </div>
      </div>
      <div id="graphe2_canvas">
@@ -53,5 +54,7 @@
      </div>
   </div>
 
+
 </body>
 </html>
+
