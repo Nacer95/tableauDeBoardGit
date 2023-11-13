@@ -11,6 +11,17 @@ var dictDataPerLevel = {};  // Recupère sessionFragmentedByLevel et restructure
 
 
 
+//Partage de données
+const dataChangeEvent = new CustomEvent('dataChange', { detail: dictDataPerLevel });
+
+function updateDictData() {
+  Object.assign(dictDataPerLevel, dictDataPerLevel);
+  document.dispatchEvent(dataChangeEvent);
+}
+
+
+
+
 //Main
 function searchStudent() {
 	console.log("searchStudent");
@@ -30,7 +41,7 @@ function searchStudent() {
 		 *
 		 **********************/
 		dataByLevel();
-		progressionBar();
+		//progressionBar();
 
 
 
@@ -48,38 +59,41 @@ function progressionBar(){
 }
 function dataByLevel(){
 	console.log("dataByLevel")
-	query(myTinCan, "all", [filterDataByLevelsPlayed, filterDataByUniqueLevel, getLevelreactionTime], sessionDataAll,  idStudent)
+	query(myTinCan, "all", [filterDataByLevelsPlayed, filterDataByUniqueLevel, displayProgressionBar, updateDictData], sessionDataAll,  idStudent)
 
 }
 
 
 //Display functions
 function displayProgressionBar(){
+	//console.log(dictDataPerLevel);
 	let compteur = 0;
-	for (key_context in dictDataPerLevel.keys){
-		console.log(key_context);
-		for (key_level in dictDataPerLevel[key_context]){
-			console.log(key_level);
-			let llist_level = dictDataPerLevel[key_context][key_context];
-			llist_level.forEach( list_level =>{
-				list_level.forEach( step_level => {
-					//console.log(step_level);
-					if (step_level.verb.id === "http://adlnet.gov/expapi/verbs/completed" ){
+	let next = false;
+	for (let key_context in dictDataPerLevel){
+		//console.log(key_context);
+		for (let key_level in dictDataPerLevel[key_context]){
+			//console.log(key_level);
+			let llist_level = dictDataPerLevel[key_context][key_level];
+			//console.log(dictDataPerLevel[key_context][key_context]);
+			for (let j=0; j<llist_level.length ; j++){
+				let list_level = dictDataPerLevel[key_context][key_level][j];
+				for (let i =0; i<list_level.length; i++){
+					if (list_level[i].verb.id === "http://adlnet.gov/expapi/verbs/completed"){
 						compteur += 1;
+						//console.log(list_level[i]);
+						next=true; break;
 					}
-				});
-			});
-
+				}
+				if (next){ next=false; break;}
+			}
 		}
-
 	}
 
 
 
 	sessionData = sessionDataProgressionBar;
-	console.log("displayProgressionBar");
 	let maxValue = 50;
-	let currentValue = 20;
+	let currentValue = compteur;
 	let percentage = (currentValue / maxValue) * 100;
 	let progressionHTML;
 	progressionHTML = document.getElementById("barreDeProgression");
@@ -249,7 +263,7 @@ function processLrsResult(err, response, myTinCanLRS, functionsToCall, dataStora
 			if (functionsToCall) {
 				for (let k = 0; k < functionsToCall.length; k++) {
 					if (typeof functionsToCall[k] == 'function') {
-						console.log('function')
+						console.log(functionsToCall[k].name);
 						functionsToCall[k]();
 						//levelReactionTime();
 					} else {
@@ -263,31 +277,6 @@ function processLrsResult(err, response, myTinCanLRS, functionsToCall, dataStora
 	}else {
 		alert("Identifiant d'étudiant non valide. Veuillez entrer un identifiant valide.");
 	}
-}
-function query1(myTinCan, verbe, functionToCall=null, dataStorage = [], idStudentQuery = idStudent ){
-	console.log("query")
-	myTinCan.lrs.queryStatements(
-		{
-			params: {
-				agent: new TinCan.Agent({
-					account: {
-					"homePage": "https://www.lip6.fr/mocah/", "name": idStudentQuery }
-				}),
-
-				verb: new TinCan.Verb({
-					id: "http://adlnet.gov/expapi/verbs/"+verbe
-				}),
-				limit: 100
-			},
-			callback: function (err, response) {
-				processLrsResult(err, response, myTinCan.lrs, functionToCall, dataStorage);
-				if (err !== null) {
-					console.log("Failed to query statements: " + err); return;
-				}
-				//htmlOutput.innerHTML += "Nombre de statements reçus : " + response.statements.length + "<br>";
-			}
-		});
-	//console.log(sessionData.length);
 }
 function query(myTinCan, verbe, functionsToCall = null, dataStorage = [], idStudentQuery = idStudent) {
     console.log("query");

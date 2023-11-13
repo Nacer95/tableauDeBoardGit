@@ -51,87 +51,221 @@
 
 </style>
 
-
-
-
-
 <figure class="highcharts-figure">
     <div id="Bar">
         <script>
 
-            function int1_n(n){
-              const categories = [];
-              for (let i = 1; i <= n; i++) {
-                // Conversion du nombre en chaîne de caractères et ajout à la liste
-                categories.push(i.toString());
-              }
-              return categories;
-          }
+            document.addEventListener('dataChange',function() {
+                console.log("Success")
+                handleDataChange(event.detail);
 
-          function int1_n_alea(n){
-              const categories = [];
-              for (let i = 1; i <= n; i++) {
-                // Conversion du nombre en chaîne de caractères et ajout à la liste
-                  let randomNumber = Math.floor(Math.random() * 40) + 1;
-                  categories.push(randomNumber);
-              }
-              return categories;
-          }
+            });
+            const dicLevelPerformance = {};
+
+            function handleDataChange(dict){
+                const dictDataPerLevel = dict;
+                console.log(dict);
+
+                function getLevelreactionTime(){
+                    let reactionTimePerLevel = 0;
+                    let reactionTimePerLevelMean = 0;
+                    let numberOfRepetition = 0;
+                    let levelSucceeded = false;
+                    let timeToSucceed = [];
+                    let timeToReadBreifing = [];
+                    //let dicLevelPerformance = {};
+                    let launchTime;
+                    let firstInsertionTime_ForRepetition=null;
+                    let firstLaunchTime_ForLevel = null;
+                    let timeSpentOnLevel = 0;
 
 
+                    for (let key_context in dictDataPerLevel) {
+                        //console.log(key_context);
+
+                        //dans le contexte
+                        for (let key_level in dictDataPerLevel[key_context]) {
+                            levelSucceeded = false;
+                            numberOfRepetition = 0;
+                            reactionTimePerLevel = 0;
+                            timeSpentOnLevel = 0;
+                            //console.log(key_level);
+
+                            let sessionFragmentedByLevel = dictDataPerLevel[key_context][key_level];
+                             //console.log(sessionFragmentedByLevel);
+
+                            if (sessionFragmentedByLevel) {
+                                // dans les répétitions d'un même niveau
+                                firstLaunchTime_ForLevel = sessionFragmentedByLevel[0][0].timestamp;
+                                //console.log(firstLaunchTime_ForLevel);
+                                for (let j = 0; j < sessionFragmentedByLevel.length; j++) {
+                                    //console.log("    Répétition"+ j);
+                                    if (sessionFragmentedByLevel[j] !== [[]]) {
+                                        //console.log(sessionFragmentedByLevel[j]);}
+                                        let sessionDataLevelRepetition = [];
+                                        sessionDataLevelRepetition = sessionFragmentedByLevel[j];
+                                        //console.log(sessionDataLevelRepetition[0].timestamp);
+                                        launchTime = sessionDataLevelRepetition[0].timestamp;
+                                        /*
+                                        * Pour chaque répétitions
+                                        */
+
+                                        /*
+                                        * Réaction time
+                                        */
+                                        for (let i = 1; i < sessionDataLevelRepetition.length; i++) {
+                                            //console.log(sessionDataLevelRepetition[i].verb.id);
+                                            if (
+                                                sessionDataLevelRepetition[i].verb.id === "https://spy.lip6.fr/xapi/verbs/opened" ||
+                                                sessionDataLevelRepetition[i].verb.id === "https://spy.lip6.fr/xapi/verbs/inserted"
+                                            ) {
+                                                firstInsertionTime_ForRepetition = sessionDataLevelRepetition[i].timestamp;
+                                                //console.log(firstInsertionTime_ForRepetition);
+                                                break;
+                                            }
+                                        }
+                                        /*
+                                        * Réaction time
+                                        */
+                                        // Cas ou le niveau n'est pas fini
+                                        if (firstInsertionTime_ForRepetition === null) {
+                                            //console.log("null");
+                                            //console.log("0");
+                                            reactionTimePerLevel += 0;
+                                        } else {
+                                            //console.log("find");
+                                            //console.log(firstInsertionTime_ForRepetition);
+                                            //console.log(launchTime);
+                                            const date1 = new Date(firstInsertionTime_ForRepetition);
+                                            const date2 = new Date(launchTime);
+                                            const differenceInMillis = date1 - date2;
+                                            const differenceInSeconds = differenceInMillis / 1000;
+                                            //console.log(differenceInSeconds);
+
+                                            reactionTimePerLevel += differenceInSeconds;
+                                        }
+
+                                        /*
+                                         * Nombre de répétitions avant réussite
 
 
-            Highcharts.chart('Bar', {
-    chart: {
-        type: 'column'
-    },
-    title: {
-        text: 'Monthly Average Rainfall'
-    },
-    subtitle: {
-        text: 'Source: WorldClimate.com'
-    },
-    xAxis: {
-        categories: int1_n(40),
-        crosshair: true
-    },
-    yAxis: {
-        min: 0,
-        title: {
-            text: 'Rainfall (mm)'
-        }
-    },
-    tooltip: {
-        headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
-        pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
-            '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
-        footerFormat: '</table>',
-        shared: true,
-        useHTML: true
-    },
-    plotOptions: {
-        column: {
-            pointPadding: 0.2,
-            borderWidth: 0
-        }
-    },
-    series: [{
-        name: 'Student',
-         color: '#dc3912', // S
-        data: int1_n_alea(40)
+                                        if (!levelSucceeded){
+                                            numberOfRepetition += 1;
+                                            console.log(sessionDataLevelRepetition[-1]);
+                                            levelSucceeded = (sessionDataLevelRepetition[-1].verb.id === "http://adlnet.gov/expapi/verbs/completed");
+                                            const dateA = new Date(sessionDataLevelRepetition[0].timestamp);
+                                            const dateB = new Date(sessionDataLevelRepetition[-1].timestamp);
+                                            const differenceInMillis_A = dateB - dateA;
+                                            const differenceInSeconds_A = differenceInMillis_A / 1000;
+                                            timeSpentOnLevel += differenceInSeconds_A;
+                                        }
+                                        if(levelSucceeded){
+                                            console.log("timeSpentOnLevel : "+timeSpentOnLevel);
+                                            console.log("numberOfRepetition : "+numberOfRepetition);
+                                        }
 
-    }, {
-        name: 'Expected',
-         color: '#CACACA', // S
-        data: int1_n_alea(40)
+                                        */
+                                    }
+                                }
+                                reactionTimePerLevelMean = Math.abs(reactionTimePerLevel / sessionFragmentedByLevel.length);
 
-    }]
-});
+
+                                //console.log("mean "+ reactionTimePerLevelMean);
+                                /*
+                                * Enregistrer les données
+                                */
+                                if (dicLevelPerformance[key_context]){
+                                    if (dicLevelPerformance[key_context][key_level]){
+                                        dicLevelPerformance[key_context][key_level]['reactionTimeLevelMean'] = reactionTimePerLevelMean;
+                                        dicLevelPerformance[key_context][key_level]['numberOfRepetition'] = numberOfRepetition;
+                                    }else {
+                                         dicLevelPerformance[key_context][key_level] = {};
+                                         dicLevelPerformance[key_context][key_level]['reactionTimeLevelMean'] = reactionTimePerLevelMean;
+                                         dicLevelPerformance[key_context][key_level]['numberOfRepetition'] = numberOfRepetition;
+                                    }
+                                }else {
+                                    dicLevelPerformance[key_context] = {};
+                                    dicLevelPerformance[key_context][key_level] = {};
+                                    dicLevelPerformance[key_context][key_level]['reactionTimeLevelMean'] = reactionTimePerLevelMean;
+                                    dicLevelPerformance[key_context][key_level]['numberOfRepetition'] = numberOfRepetition;
+                                }
+                            }
+                            //console.log(dicLevelPerformance);
+                        }
+                    }
+                }
+                getLevelreactionTime();
+                console.log(dicLevelPerformance);
+            }
+            function displayDataChange(){
+                function int1_n(n){
+                  const categories = [];
+                  for (let i = 1; i <= n; i++) {
+                    // Conversion du nombre en chaîne de caractères et ajout à la liste
+                    categories.push(i.toString());
+                  }
+                  return categories;
+                }
+
+                function int1_n_alea(n){
+                  const categories = [];
+                  for (let i = 1; i <= n; i++) {
+                    // Conversion du nombre en chaîne de caractères et ajout à la liste
+                      let randomNumber = Math.floor(Math.random() * 40) + 1;
+                      categories.push(randomNumber);
+                  }
+                  return categories;
+                }
+
+
+                Highcharts.chart('Bar', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Monthly Average Rainfall'
+                    },
+                    subtitle: {
+                        text: 'Source: WorldClimate.com'
+                    },
+                    xAxis: {
+                        categories: int1_n(40),
+                        crosshair: true
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Rainfall (mm)'
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                        pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                            '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+                        footerFormat: '</table>',
+                        shared: true,
+                        useHTML: true
+                    },
+                    plotOptions: {
+                        column: {
+                            pointPadding: 0.2,
+                            borderWidth: 0
+                        }
+                    },
+                    series: [{
+                        name: 'Student',
+                         color: '#dc3912', // S
+                        data: int1_n_alea(40)
+
+                    }, {
+                        name: 'Expected',
+                         color: '#CACACA', // S
+                        data: int1_n_alea(40)
+
+                    }]
+                });
+            };
+            //handleDataChange();
         </script>
-
-
-
-
     </div>
-
 </figure>

@@ -59,6 +59,8 @@
 <figure class="highcharts-figure">
     <div id="container">
       <script>
+          document.addEventListener('dataChange', console.log("SuccessLeve"));
+
           function int1_n(n){
               const categories = [];
               for (let i = 1; i <= n; i++) {
