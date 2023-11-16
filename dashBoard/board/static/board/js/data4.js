@@ -20,8 +20,6 @@ function updateDictData() {
 }
 
 
-
-
 //Main
 function searchStudent() {
 	console.log("searchStudent");
@@ -53,10 +51,6 @@ function searchStudent() {
 
 
 //Launch functions
-function progressionBar(){
-	console.log("progressionBar")
-	query(myTinCan, "completed", [displayProgressionBar], sessionDataProgressionBar,  idStudent)
-}
 function dataByLevel(){
 	console.log("dataByLevel")
 	query(myTinCan, "all", [filterDataByLevelsPlayed, filterDataByUniqueLevel, displayProgressionBar, updateDictData], sessionDataAll,  idStudent)
@@ -174,53 +168,6 @@ function filterDataByUniqueLevel(){
 
 
 }
-function getLevelreactionTime(){
-
-	let reactionTimePerLevel = [];
-	let launchTime;
-	let firstInsertionTime=null;
-	if(sessionFragmentedByLevel !== [[]]){
-		for(let j = 1; j<sessionFragmentedByLevel.length; j++){
-			if (sessionFragmentedByLevel[j] !== []) {
-				//console.log(sessionFragmentedByLevel[j]);}
-				let sessionDataLevel = [];
-				sessionDataLevel = sessionFragmentedByLevel[j];
-				//console.log(sessionDataLevel[0].timestamp);
-				launchTime = sessionDataLevel[0].timestamp;
-				for (let i = 0; i < sessionDataLevel.length; i++) {
-					//console.log(sessionDataLevel[i].verb.id);
-					if (
-						sessionDataLevel[i].verb.id === "https://spy.lip6.fr/xapi/verbs/opened" ||
-						sessionDataLevel[i].verb.id === "https://spy.lip6.fr/xapi/verbs/inserted"
-					) {
-						firstInsertionTime = sessionDataLevel[i].timestamp;
-						//console.log(firstInsertionTime);
-						break;
-					}
-				}
-				// Cas ou le niveau n'est pas fini
-				if (firstInsertionTime === null) {
-					//console.log("null");
-					reactionTimePerLevel.push(null);
-				} else {
-					//console.log("find");
-					let reactionTimeValue;
-					//console.log(firstInsertionTime);
-					//console.log(launchTime);
-					const date1 = new Date(firstInsertionTime);
-					const date2 = new Date(launchTime);
-					const differenceInMillis = date1 - date2;
-					const differenceInSeconds = differenceInMillis / 1000;
-					//reactionTimeValue = firstInsertionTime - launchTime;
-
-					reactionTimePerLevel.push(differenceInSeconds);
-				}
-			}
-		}
-	}
-	console.log(reactionTimePerLevel);
-}
-
 
 // Process LRS results
 function processLrsResult(err, response, myTinCanLRS, functionsToCall, dataStorage) {
@@ -315,7 +262,6 @@ function query(myTinCan, verbe, functionsToCall = null, dataStorage = [], idStud
 window.onload = function(){
 	// récupération de la balise result
 	htmlOutput = document.getElementById("result");
-
 	try{
 	  myTinCan = new TinCan();
 	  myTinCan.lrs = new TinCan.LRS(
@@ -325,10 +271,9 @@ window.onload = function(){
 		password: "b547a66817be9c2dbad2a5f583e704397c9db809"
 		});
 		htmlOutput.innerHTML = "Connection avec le LRS OK<br>";
-
-		// Construction d'une requête pour récupérer tous les statements d'un agent
+		//Construction d'une requête pour récupérer tous les statements d'un agent
 		//htmlOutput.innerHTML += "Envoi requête, en attente de réponse...<br>";
-		query(myTinCan, "completed");
+		//query(myTinCan, "completed");
 		//console.log(sessionData)
 	}
 	catch (ex) {

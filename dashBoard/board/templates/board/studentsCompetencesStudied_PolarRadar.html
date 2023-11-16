@@ -60,18 +60,126 @@
 <figure class="highcharts-figure">
     <div id="polar">
         <script>
-            Highcharts.chart('polar', {
+
+            document.addEventListener('dataChange',function() {
+                console.log("Success Polar Radar")
+                handleDataChangePolar(event.detail); });
+
+            const conceptsPerLevel = {
+                '0 - tutoriel': {'tutoriel':[]},
+                '1 - explorateur':{
+                    'niveau01':['priseEnMain'],
+                    'niveau02':['priseEnMain'],
+                    'niveau03':['priseEnMain'],
+                    'niveau04':['priseEnMain'],
+                    'niveau05':['priseEnMain'],
+                    'niveau06':['priseEnMain'],
+                    'niveau07':['priseEnMain'],
+                    'niveau08':['priseEnMain'],
+                    'niveau09':['priseEnMain']},
+                '2 - collaborateur':{
+                    'niveau01':['nommage'],
+                    'niveau02':['parallélisme'],
+                    'niveau03':['parallélisme'],
+                    'niveau04':['parallélisme'],
+                    'niveau05':['parallélisme'],
+                    'niveau06':['nommage', 'comprehensionDeCode'],
+                    'niveau07':['nommage', 'comprehensionDeCode'],
+                    'niveau08':['parallélisme', 'deboguer'],
+                    'niveau09':['parallélisme', 'nommage','comprehensionDeCode'],
+                    'niveau10':['parallélisme', 'nommage', 'deboguer'],
+                    'niveau11':['nommage'],
+                    'niveau12':['nommage']},
+                '3 - repetiteur':{
+                    'niveau01':['boucles'],
+                    'niveau02':['boucles'],
+                    'niveau03':['boucles'],
+                    'niveau04':['boucles'],
+                    'niveau05':['boucles'],
+                    'niveau06':['boucles'],
+                    'niveau07':['boucles'],
+                    'niveau08':['boucles'],
+                    'niveau09':['boucles'],
+                    'niveau10':['boucles']},
+                '4 - selectionneur':{
+                    'niveau01':['boucles', 'conditions'],
+                    'niveau02':['boucles', 'conditions', 'instructionsEnCode'],
+                    'niveau03':['boucles', 'negation'],
+                    'niveau04':['boucles', 'conditions', 'instructionsEnCode'],
+                    'niveau05':['boucles', 'conditions', 'negation', 'instructionsEnCode'],
+                    'niveau06':['boucles', 'conditions','connecteursLogiques', 'negation'],
+                    'niveau07':['boucles', 'conditions', 'negation', 'parallélisme', 'Généricité', ],
+                    'niveau08':['boucles', 'conditions', 'negation', 'instructionsEnCode']},
+            };
+            const starsPerConcept = {
+                'connecteursLogiques':0,
+                'boucles':0,
+                'conditions':0,
+                'negation':0,
+                'comprehensionDeCode':0,
+                'parallélisme':0,
+                'nommage':0,
+                'priseEnMain':0,
+
+            };
+            const competencesScores = [];
+
+
+            function getCompetencesScores() {
+                for (let key_context in dictDataPerLevel) {
+                    //console.log(key_context);
+                    for (let key_level in dictDataPerLevel[key_context]) {
+                        let maxScore = 0;
+                        //console.log(key_level);
+                        let sessionFragmentedByLevel = dictDataPerLevel[key_context][key_level];
+                        if (sessionFragmentedByLevel) {
+                            // dans les répétitions d'un même niveau
+                            for (let j = 0; j < sessionFragmentedByLevel.length; j++) {
+                                //récupérer la meilleure tentative
+                                let sessionDataLevelRepetition = sessionFragmentedByLevel[j];
+                                let l_length = sessionDataLevelRepetition.length-1;
+                                if (sessionDataLevelRepetition[l_length].verb.id === "http://adlnet.gov/expapi/verbs/completed"){
+                                    let score = sessionDataLevelRepetition[l_length].result.extensions['https://spy.lip6.fr/xapi/extensions/score'];
+                                    if (score!=undefined){
+                                        let score_int = parseInt(score[0], 10);
+                                        if (score>maxScore){maxScore=score_int; }
+                                    }
+
+                                }
+                            }
+                            let competencesListForTheCurrentLevel = conceptsPerLevel[key_context][key_level];
+                            for (let k = 0; k<competencesListForTheCurrentLevel.length; k++){
+                                let competence = competencesListForTheCurrentLevel[k];
+
+                                if (competence in starsPerConcept){
+                                    starsPerConcept[competence] = starsPerConcept[competence]+maxScore;
+                                }
+                                else {
+                                    console.log("La compétence", competence, "n'existe pas dans le dictionnaire.");
+                                }
+                            }
+                        }
+                    }
+                }
+                console.log(starsPerConcept);
+                for (let competence in starsPerConcept){
+                    competencesScores.push(starsPerConcept[competence]);
+                }
+                //console.log(competencesScores);
+            }
+            function displayChart(){
+                Highcharts.chart('polar', {
 
                 chart: {
                     polar: true
                 },
 
                 title: {
-                    text: 'Highcharts Polar Chart'
+                    text: 'Compétences travaillées'
                 },
 
                 subtitle: {
-                    text: 'Also known as Radar Chart'
+                    text: 'Le score en fonction des étoiles récoltées'
                 },
 
                 pane: {
@@ -84,7 +192,13 @@
                     min: 0,
                     max: 360,
                     labels: {
-                        format: '{value}°'
+                        formatter: function () {
+                            // Utiliser l'opération de modulo pour formater les étiquettes
+                            const skills = ['connecteursLogiques','boucles', 'conditions', 'negation', 'comprehensionDeCode', 'parallélisme', 'nommage', 'priseEnMain'];
+                            const index = this.value / 45; // Calculer l'index de compétence
+                            return skills[index] || ''; // Afficher la compétence correspondante ou une chaîne vide
+                        },
+                        rotation: 0 // Ajustez la rotation si nécessaire
                     }
                 },
 
@@ -104,20 +218,19 @@
                 },
 
                 series: [{
-                    type: 'column',
-                    name: 'Column',
-                    data: [8, 7, 6, 5, 4, 3, 2, 1],
-                    pointPlacement: 'between'
-                }, {
-                    type: 'line',
-                    name: 'Line',
-                    data: [1, 2, 3, 4, 5, 6, 7, 8]
-                }, {
                     type: 'area',
                     name: 'Area',
-                    data: [1, 8, 2, 7, 3, 6, 4, 5]
+                    data: competencesScores
                 }]
             });
+            }
+
+
+            function handleDataChangePolar(){
+                getCompetencesScores();
+                displayChart();
+            }
+
         </script>
     </div>
 </figure>

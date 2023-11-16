@@ -54,19 +54,13 @@
 <figure class="highcharts-figure">
     <div id="Bar">
         <script>
-
             document.addEventListener('dataChange',function() {
-                console.log("Success")
-                handleDataChange(event.detail);
+                console.log("Success Difficulty column")
+                handleDataChange(event.detail); });
 
-            });
             const dicLevelPerformance = {};
-
-            function handleDataChange(dict){
-                const dictDataPerLevel = dict;
-                console.log(dict);
-
-                function getLevelreactionTime(){
+            const difficultyCurve = [];
+            function getLevePerformance(){
                     let reactionTimePerLevel = 0;
                     let reactionTimePerLevelMean = 0;
                     let numberOfRepetition = 0;
@@ -78,6 +72,7 @@
                     let firstInsertionTime_ForRepetition=null;
                     let firstLaunchTime_ForLevel = null;
                     let timeSpentOnLevel = 0;
+
 
 
                     for (let key_context in dictDataPerLevel) {
@@ -147,56 +142,59 @@
 
                                         /*
                                          * Nombre de répétitions avant réussite
-
-
+                                         */
                                         if (!levelSucceeded){
                                             numberOfRepetition += 1;
-                                            console.log(sessionDataLevelRepetition[-1]);
-                                            levelSucceeded = (sessionDataLevelRepetition[-1].verb.id === "http://adlnet.gov/expapi/verbs/completed");
+                                            let l_lenght = sessionDataLevelRepetition.length -1;
+                                            //console.log(sessionDataLevelRepetition[l_lenght]);
+                                            levelSucceeded = (sessionDataLevelRepetition[l_lenght].verb.id === "http://adlnet.gov/expapi/verbs/completed");
                                             const dateA = new Date(sessionDataLevelRepetition[0].timestamp);
-                                            const dateB = new Date(sessionDataLevelRepetition[-1].timestamp);
+                                            const dateB = new Date(sessionDataLevelRepetition[l_lenght].timestamp);
                                             const differenceInMillis_A = dateB - dateA;
                                             const differenceInSeconds_A = differenceInMillis_A / 1000;
                                             timeSpentOnLevel += differenceInSeconds_A;
                                         }
                                         if(levelSucceeded){
-                                            console.log("timeSpentOnLevel : "+timeSpentOnLevel);
-                                            console.log("numberOfRepetition : "+numberOfRepetition);
+                                            //console.log("timeSpentOnLevel : "+timeSpentOnLevel);
+                                            //console.log("numberOfRepetition : "+numberOfRepetition);
                                         }
-
-                                        */
                                     }
                                 }
                                 reactionTimePerLevelMean = Math.abs(reactionTimePerLevel / sessionFragmentedByLevel.length);
-
 
                                 //console.log("mean "+ reactionTimePerLevelMean);
                                 /*
                                 * Enregistrer les données
                                 */
+                                let fact_reduction = 3.0;
                                 if (dicLevelPerformance[key_context]){
                                     if (dicLevelPerformance[key_context][key_level]){
                                         dicLevelPerformance[key_context][key_level]['reactionTimeLevelMean'] = reactionTimePerLevelMean;
                                         dicLevelPerformance[key_context][key_level]['numberOfRepetition'] = numberOfRepetition;
+                                        dicLevelPerformance[key_context][key_level]['timeSpentToSucceedLevel'] = timeSpentOnLevel;
+                                        dicLevelPerformance[key_context][key_level]['difficultyValue'] = reactionTimePerLevelMean + timeSpentOnLevel + (timeSpentOnLevel/fact_reduction);
                                     }else {
                                          dicLevelPerformance[key_context][key_level] = {};
                                          dicLevelPerformance[key_context][key_level]['reactionTimeLevelMean'] = reactionTimePerLevelMean;
                                          dicLevelPerformance[key_context][key_level]['numberOfRepetition'] = numberOfRepetition;
+                                         dicLevelPerformance[key_context][key_level]['timeSpentToSucceedLevel'] = timeSpentOnLevel;
+                                         dicLevelPerformance[key_context][key_level]['difficultyValue'] = reactionTimePerLevelMean + timeSpentOnLevel + (timeSpentOnLevel/fact_reduction);
                                     }
                                 }else {
                                     dicLevelPerformance[key_context] = {};
                                     dicLevelPerformance[key_context][key_level] = {};
                                     dicLevelPerformance[key_context][key_level]['reactionTimeLevelMean'] = reactionTimePerLevelMean;
                                     dicLevelPerformance[key_context][key_level]['numberOfRepetition'] = numberOfRepetition;
+                                    dicLevelPerformance[key_context][key_level]['timeSpentToSucceedLevel'] = timeSpentOnLevel;
+                                    dicLevelPerformance[key_context][key_level]['difficultyValue'] = reactionTimePerLevelMean + timeSpentOnLevel + (timeSpentOnLevel/fact_reduction);
                                 }
                             }
+                            difficultyCurve.push(dicLevelPerformance[key_context][key_level]['difficultyValue']);
+
                             //console.log(dicLevelPerformance);
                         }
                     }
                 }
-                getLevelreactionTime();
-                console.log(dicLevelPerformance);
-            }
             function displayDataChange(){
                 function int1_n(n){
                   const categories = [];
@@ -223,10 +221,10 @@
                         type: 'column'
                     },
                     title: {
-                        text: 'Monthly Average Rainfall'
+                        text: 'Graphe de complexité par niveau'
                     },
                     subtitle: {
-                        text: 'Source: WorldClimate.com'
+                        text: 'La complexité est estimée en fonction des performances'
                     },
                     xAxis: {
                         categories: int1_n(40),
@@ -255,7 +253,7 @@
                     series: [{
                         name: 'Student',
                          color: '#dc3912', // S
-                        data: int1_n_alea(40)
+                        data: difficultyCurve
 
                     }, {
                         name: 'Expected',
@@ -265,7 +263,12 @@
                     }]
                 });
             };
-            //handleDataChange();
+
+            function handleDataChange(dict){
+                getLevePerformance();
+                displayDataChange();
+                console.log(dicLevelPerformance);
+            }
         </script>
     </div>
 </figure>
