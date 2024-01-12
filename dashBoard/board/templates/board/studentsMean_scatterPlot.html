@@ -1,7 +1,11 @@
+{% load static  %}
+
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/modules/export-data.js"></script>
 <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
 
 <style>
     #container {
@@ -61,128 +65,398 @@
     <div id="container"></div>
 
 <script>
-
-    document.addEventListener('dataChange', console.log("StudentMean"));
-
-    Highcharts.setOptions({
-    colors: ['rgba(5,141,199,0.5)', 'rgba(80,180,50,0.5)', 'rgba(237,86,27,0.5)']
-});
-
-const series = [{
-    name: 'Basketball',
-    id: 'basketball',
-    marker: {
-        symbol: 'circle'
-    }
-},
-{
-    name: 'Triathlon',
-    id: 'triathlon',
-    marker: {
-        symbol: 'triangle'
-    }
-},
-{
-    name: 'Volleyball',
-    id: 'volleyball',
-    marker: {
-        symbol: 'square'
-    }
-}];
-
-
-async function getData() {
-    const response = await fetch(
-        'https://cdn.jsdelivr.net/gh/highcharts/highcharts@24912efc85/samples/data/olympic2012.json'
-    );
-    return response.json();
-}
-
-
-getData().then(data => {
-    const getData = sportName => {
-        const temp = [];
-        data.forEach(elm => {
-            if (elm.sport === sportName && elm.weight > 0 && elm.height > 0) {
-                temp.push([elm.height, elm.weight]);
-            }
-        });
-        return temp;
-    };
-    series.forEach(s => {
-        s.data = getData(s.id);
+    let studentsClass2 = ["93655853", "C1E0F8B9"];
+    const cheminFichierCSV = "{% static 'board/files/full_spy_data.csv' %}";
+    document.addEventListener('dataChange',function() {
+                console.log("Success Resilience column")
+                handleDataChangeMean(studentsClass2); });
+    document.addEventListener('eventStudentClassChange', async function() {
+                alert("mean target reached");
+                studentsClass2 = event.detail.studentsClass;
+                alert(studentsClass2);
+                let classLevelMean = await getLevelMeanClass(studentsClass2, cheminFichierCSV);
+                DisplayMean(classLevelMean);
+                alert("mean target reached and changed");
     });
 
-    Highcharts.chart('container', {
-        chart: {
-            type: 'scatter',
-            zoomType: 'xy'
-        },
-        title: {
-            text: 'Olympics athletes by height and weight',
-            align: 'left'
-        },
-        subtitle: {
-            text:
-          'Source: <a href="https://www.theguardian.com/sport/datablog/2012/aug/07/olympics-2012-athletes-age-weight-height">The Guardian</a>',
-            align: 'left'
-        },
-        xAxis: {
-            title: {
-                text: 'Height'
-            },
-            labels: {
-                format: '{value} m'
-            },
-            startOnTick: true,
-            endOnTick: true,
-            showLastLabel: true
-        },
-        yAxis: {
-            title: {
-                text: 'Weight'
-            },
-            labels: {
-                format: '{value} kg'
+    //Partage de données
+    const dictNameToLine = {};
+    const dataChangeEventDicClassPerLevel = new CustomEvent('dataChangeDicClassPerLevel', { detail: dictNameToLine });
+    function updateDictDataClassPerLevel() {
+      Object.assign(dictNameToLine, dictNameToLine);
+      document.dispatchEvent(dataChangeEventDicClassPerLevel);
+    }
+
+    function readCSVFile(cheminFichierCSV) {
+        return new Promise((resolve, reject) => {
+            // Utilisation de fetch pour récupérer le fichier CSV
+            // const dictNameToLine = {};
+            fetch(cheminFichierCSV)
+                .then(response => response.text())
+                .then(csvData => {
+                    // Utilisation de PapaParse pour parser le contenu CSV
+                    Papa.parse(csvData, {
+                        header: true, // La première ligne est considérée comme l'en-tête
+                        dynamicTyping: true,
+                        complete: function(results) {
+                            // results.data contient les données CSV sous forme d'objet
+                            const lignes = results.data;
+
+                            // Parcourir toutes les lignes pour ajouter au dictionnaire
+                            lignes.forEach(ligne => {
+                                const actorObject = JSON.parse(ligne.actor);
+                                const name = actorObject.name;
+
+                                // Vérifier si la clé existe déjà dans le dictionnaire
+                                if (dictNameToLine[name]) {
+                                    // La clé existe, ajouter la ligne à la liste existante
+                                    dictNameToLine[name].push(ligne);
+                                } else {
+                                    // La clé n'existe pas, créer une nouvelle clé avec la ligne
+                                    dictNameToLine[name] = [ligne];
+                                }
+                            });
+                            // Résoudre la promesse avec le dictionnaire une fois le traitement terminé
+                            resolve(dictNameToLine);
+                            //console.log(dictNameToLine);
+                            console.log("93655853 93655853 93655853 93655853 93655853");
+                            console.log(dictNameToLine[93655853]);
+                        }
+                    });
+                })
+            .catch(error => {
+                // Rejeter la promesse en cas d'erreur
+                console.error('Erreur lors de la récupération ou de l\'analyse du fichier CSV :', error);
+                reject(error);
+            });
+        });
+
+    }
+    function extractPlayerData(PlayerGameID, file){
+        let dictPlayerDataBrut = {};
+        return dictPlayerDataBrut;
+    }
+    function filterDataByLevelsPlayed1(dictPlayerDataBrut) {
+        console.log("filterDataByLevel1 ============");
+        let store = false;
+        let dataLevel = [];
+        let dictPlayerDataFragmentedByLevel = [];
+
+        for (let j = 0; j < dictPlayerDataBrut.length; j++) {
+            let verbObject = JSON.parse(dictPlayerDataBrut[j].verb);
+
+            if (verbObject.id === "http://adlnet.gov/expapi/verbs/launched") {
+                dataLevel = [];
+                store = true;
             }
-        },
-        legend: {
-            enabled: true
-        },
-        plotOptions: {
-            scatter: {
-                marker: {
-                    radius: 2.5,
-                    symbol: 'circle',
-                    states: {
-                        hover: {
-                            enabled: true,
-                            lineColor: 'rgb(100,100,100)'
-                        }
-                    }
-                },
-                states: {
-                    hover: {
-                        marker: {
-                            enabled: false
-                        }
-                    }
-                },
-                jitter: {
-                    x: 0.005
+
+            if (store) {
+                dataLevel.push(dictPlayerDataBrut[j]);
+            }
+
+            if (
+                verbObject.id === "http://adlnet.gov/expapi/verbs/completed" ||
+                verbObject.id === "http://adlnet.gov/expapi/verbs/exited"
+            ) {
+                if (store) {
+                    dictPlayerDataFragmentedByLevel.push(dataLevel);
+                    store = false;
                 }
             }
-        },
-        tooltip: {
-            pointFormat: 'Height: {point.x} m <br/> Weight: {point.y} kg'
-        },
-        series
-    });
-}
-);
+        }
+
+        // Si store est toujours vrai à la fin, il faut ajouter les données restantes.
+        if (store) {
+            dictPlayerDataFragmentedByLevel.push(dataLevel);
+        }
+
+        //console.log(dictPlayerDataFragmentedByLevel);
+        return dictPlayerDataFragmentedByLevel;
+    }
+    function filterDataByUniqueLevel1(dictPlayerDataFragmentedByLevel){
+        //console.log(sessionFragmentedByLevel[1]);
+        let dictPlayerDataPerLevel = {};
+        for (let j = 0; j < dictPlayerDataFragmentedByLevel.length; j++) {
+            let element_0 = JSON.parse(dictPlayerDataFragmentedByLevel[j][0].object);
+            let element = dictPlayerDataFragmentedByLevel[j];
+
+            //console.log(element_0);
+            //console.log(element[0].object);
+            let contexte = element_0.definition.extensions["https://spy&46;lip6&46;fr/xapi/extensions/context"];
+            let niveau = element_0.definition.extensions["https://w3id&46;org/xapi/seriousgames/extensions/progress"];
+            //console.log(niveau);
+            if (dictPlayerDataPerLevel[contexte]) {
+                if (dictPlayerDataPerLevel[contexte][niveau]) {
+                    dictPlayerDataPerLevel[contexte][niveau].push(element);
+                } else {
+                    dictPlayerDataPerLevel[contexte][niveau] = [element];
+                }
+            } else {
+                dictPlayerDataPerLevel[contexte] = {};
+                dictPlayerDataPerLevel[contexte][niveau] = [element];
+            }
+        };
+
+        //console.log(dictPlayerDataPerLevel)
+        return dictPlayerDataPerLevel;
+    }
+    function getCompetencesScores3(dictPlayerDataPerLevel) {
+
+        let playerStarsPerConcept = {
+            'connecteursLogiques':0,
+            'boucles':0,
+            'conditions':0,
+            'negation':0,
+            'comprehensionDeCode':0,
+            'parallélisme':0,
+            'nommage':0,
+            'priseEnMain':0,
+        };
+        let listPlayerCompetencesScores = [];
+        let conceptsPerLevel1 = {
+                '0 - tutoriel': {'tutoriel':[]},
+                '1 - explorateur':{
+                    'niveau01':['priseEnMain'],
+                    'niveau02':['priseEnMain'],
+                    'niveau03':['priseEnMain'],
+                    'niveau04':['priseEnMain'],
+                    'niveau05':['priseEnMain'],
+                    'niveau06':['priseEnMain'],
+                    'niveau07':['priseEnMain'],
+                    'niveau08':['priseEnMain'],
+                    'niveau09':['priseEnMain']},
+                '2 - collaborateur':{
+                    'niveau01':['nommage'],
+                    'niveau02':['parallélisme'],
+                    'niveau03':['parallélisme'],
+                    'niveau04':['parallélisme'],
+                    'niveau05':['parallélisme'],
+                    'niveau06':['nommage', 'comprehensionDeCode'],
+                    'niveau07':['nommage', 'comprehensionDeCode'],
+                    'niveau08':['parallélisme', 'deboguer'],
+                    'niveau09':['parallélisme', 'nommage','comprehensionDeCode'],
+                    'niveau10':['parallélisme', 'nommage', 'deboguer'],
+                    'niveau11':['nommage'],
+                    'niveau12':['nommage']},
+                '3 - repetiteur':{
+                    'niveau01':['boucles'],
+                    'niveau02':['boucles'],
+                    'niveau03':['boucles'],
+                    'niveau04':['boucles'],
+                    'niveau05':['boucles'],
+                    'niveau06':['boucles'],
+                    'niveau07':['boucles'],
+                    'niveau08':['boucles'],
+                    'niveau09':['boucles'],
+                    'niveau10':['boucles']},
+                '4 - selectionneur':{
+                    'niveau01':['boucles', 'conditions'],
+                    'niveau02':['boucles', 'conditions', 'instructionsEnCode'],
+                    'niveau03':['boucles', 'negation'],
+                    'niveau04':['boucles', 'conditions', 'instructionsEnCode'],
+                    'niveau05':['boucles', 'conditions', 'negation', 'instructionsEnCode'],
+                    'niveau06':['boucles', 'conditions','connecteursLogiques', 'negation'],
+                    'niveau07':['boucles', 'conditions', 'negation', 'parallélisme', 'Généricité', ],
+                    'niveau08':['boucles', 'conditions', 'negation', 'instructionsEnCode']},
+            };
+        console.log("before for ");
+        for (let key_context in dictPlayerDataPerLevel) {
+            console.log(key_context);
+            for (let key_level in dictPlayerDataPerLevel[key_context]) {
+                let maxScore = 0;
+                //key_level = extractFrenchLevel(key_level);
+                console.log(key_level);
+                let sessionFragmentedByLevel = dictPlayerDataPerLevel[key_context][key_level];
+                if (sessionFragmentedByLevel) {
+                    // dans les répétitions d'un même niveau
+                    for (let j = 0; j < sessionFragmentedByLevel.length; j++) {
+                        //récupérer la meilleure tentative
+                        let sessionDataLevelRepetition = sessionFragmentedByLevel[j];
+                        let l_length = sessionDataLevelRepetition.length-1;
+                        let verbObject = JSON.parse(sessionDataLevelRepetition[l_length].verb);
+                        if (verbObject.id === "http://adlnet.gov/expapi/verbs/completed"){
+                            let resultObject = JSON.parse(sessionDataLevelRepetition[l_length].result);
+                            let score = resultObject.extensions['https://spy&46;lip6&46;fr/xapi/extensions/score'];
+                            if (score!=undefined){ // implique que le niveau est réussit
+                                let score_int = parseInt(score[0], 10);
+                                if (score_int > maxScore){maxScore = score_int; }
+                            }
+                        }
+                    }
+                    let competencesListForTheCurrentLevel;
+                    let erreur = false;
+                    try{
+                        key_context = extractFrenchLevel(key_context);
+                        key_level = extractFrenchLevel(key_level);
+                        competencesListForTheCurrentLevel = conceptsPerLevel[key_context][key_level];
+                    }catch{
+                        erreur = true;
+                    }
+                    if (!erreur && competencesListForTheCurrentLevel && competencesListForTheCurrentLevel.length ){
+                        for (let k = 0; k<competencesListForTheCurrentLevel.length; k++){
+                        let competence = competencesListForTheCurrentLevel[k];
+                        if (competence in playerStarsPerConcept){
+                            let maxScore_on20 = 0;
+                            let old_mean = playerStarsPerConcept[competence];
+                            let new_mean = 0;
+                            let convert_maxScore = 0;
+                            let starsLevel = starsPerLevel[key_context][key_level];
+                            //console.log(starsLevel);
+                            if (maxScore < starsLevel[0]){
+                                if (maxScore < starsLevel[1]){
+                                    convert_maxScore = 1;
+                                    maxScore_on20 = (convert_maxScore*20.0)/3.0;
+                                }else{
+                                    convert_maxScore = 2;
+                                    maxScore_on20 = (convert_maxScore*20.0)/3.0;
+                                }
+                            }else {
+                                convert_maxScore = 3;
+                                maxScore_on20 = (convert_maxScore*20.0)/3.0;
+                            }
+
+                            if (old_mean > 0){
+                                new_mean = (old_mean + maxScore_on20)/2.0;
+                            }else{
+                                new_mean = maxScore_on20;
+                            }
+
+                            playerStarsPerConcept[competence] = new_mean;
+                        }
+                        else {
+                            console.log("La compétence", competence, "n'existe pas dans le dictionnaire.");
+                        }
+                    }
+                    }else{
+                        erreur = true;
+                    }
+                }
+            }
+        }
+        console.log(playerStarsPerConcept);
+        for (let competence in playerStarsPerConcept){
+            listPlayerCompetencesScores.push(playerStarsPerConcept[competence]);
+        }
+        console.log(listPlayerCompetencesScores);
+        return listPlayerCompetencesScores;
+    }
+    function getPlayerLevelMean1(classLevelMean, listPlayerCompetencesScores, PlayerGameID){
+        let mean, len;
+        mean = 0.0;
+        console.log("somme 1 ="+mean);
+        len = starsPerConcept.length * 1.0;
+        for (let i=0; i<listPlayerCompetencesScores.length; i++){
+            mean += listPlayerCompetencesScores[i];
+        }
+        console.log("somme 2 ="+mean);
+        mean = mean/8.0;
+        classLevelMean[PlayerGameID] = mean;
+        console.log("somme 3 ="+mean);
+        console.log(classLevelMean);
+
+        return classLevelMean;
+    }
 
 
+    async function getLevelMeanClass(ClassPlayersGameID, file) {
+        console.log("dictNameToLineTmp");
+        await readCSVFile(file);
+        let classLevelMean = {};
+        let PlayerGameID;
+        for (let i = 0; i < ClassPlayersGameID.length; i++) {
+            PlayerGameID = ClassPlayersGameID[i];
+            let dictPlayerDataFragmentedByLevel = {};
+            let dictPlayerDataPerLevel = {};
+            let listPlayerCompetencesScores = [];
 
+            dictPlayerDataFragmentedByLevel = filterDataByLevelsPlayed1(dictNameToLine[PlayerGameID]);
+            dictPlayerDataPerLevel = filterDataByUniqueLevel1(dictPlayerDataFragmentedByLevel);
+            listPlayerCompetencesScores = getCompetencesScores3(dictPlayerDataPerLevel);
+            console.log(listPlayerCompetencesScores);
+            classLevelMean = getPlayerLevelMean1(classLevelMean, listPlayerCompetencesScores, PlayerGameID);
+        }
+        console.log(classLevelMean);
+        return classLevelMean;
+    }
+    function DisplayMean(classLevelMean) {
+        Highcharts.setOptions({
+            colors: ['rgba(5,141,199,0.5)']
+        });
+
+        const labels = Object.keys(classLevelMean);
+
+        const series = [{
+            name: 'Moyenne de classe par élèves',
+            id: 'moyenneClasse',
+            marker: {
+                symbol: 'circle'
+            },
+            data: labels.map(userID => [userID, classLevelMean[userID]])
+        }];
+
+        Highcharts.chart('container', {
+            chart: {
+                type: 'scatter',
+                zoomType: 'xy'
+            },
+            title: {
+                text: 'Moyenne de classe par élèves',
+                align: 'left'
+            },
+            xAxis: {
+                title: {
+                    text: 'Utilisateurs'
+                },
+                categories: labels
+            },
+            yAxis: {
+                title: {
+                    text: 'Moyenne'
+                },
+                min:0,
+                max:20
+            },
+            legend: {
+                enabled: true
+            },
+            plotOptions: {
+                scatter: {
+                    marker: {
+                        radius: 5,
+                        symbol: 'circle',
+                        states: {
+                            hover: {
+                                enabled: true,
+                                lineColor: 'rgb(100,100,100)'
+                            }
+                        }
+                    },
+                    states: {
+                        hover: {
+                            marker: {
+                                enabled: false
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: {
+                formatter: function () {
+                    const userID = labels[this.point.x];
+                    return `Moyenne: ${this.y} <br/> Élève: ${userID}`;
+                }
+            },
+            series
+        });
+    }
+
+    async function handleDataChangeMean(detail){
+        let classLevelMean = await getLevelMeanClass(studentsClass2, cheminFichierCSV);
+        updateDictDataClassPerLevel();
+        alert("display mean");
+        DisplayMean(classLevelMean);
+        alert("displayed mean");
+    }
 
 </script>
 </figure>

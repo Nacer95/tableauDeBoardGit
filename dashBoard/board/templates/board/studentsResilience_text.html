@@ -1,10 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
 
-</body>
-</html>
+<div>
+
+    <script>
+        document.addEventListener('dataChange',function() {
+                console.log("Success Resilience column")
+                handleDataChangeResilience(event.detail); });
+
+        function displayResilience(){
+            console.log(dictDataPerLevel);
+            let compteur = 0;
+            let next = false;
+            let resilienceFactor ;
+            let numTotalOfLevelWithRep = 0.0;
+            let numTotalOfLevelWithoutRep = 0.0;
+            for (let key_context in dictDataPerLevel){
+                //console.log(key_context);
+                for (let key_level in dictDataPerLevel[key_context]){
+                    //console.log(key_level);
+                    numTotalOfLevelWithoutRep += 1;
+                    let llist_level = dictDataPerLevel[key_context][key_level];
+                    //console.log(dictDataPerLevel[key_context][key_context]);
+                    numTotalOfLevelWithRep += llist_level.length;
+                }
+            }
+
+            console.log(numTotalOfLevelWithRep +" /"+numTotalOfLevelWithoutRep);
+            resilienceFactor =  numTotalOfLevelWithoutRep/numTotalOfLevelWithRep;
+            let isResilient;
+            if (resilienceFactor < 0.5){ // numTotalOfLevelWithRep est beaucoup plus grand que numTotalOfLevelWithoutRep
+                isResilient = "Résilient"
+            }else {
+                isResilient = "Non résilient"
+            }
+
+            let resilienceHTML = document.getElementById("barreDeResilience");
+            if (resilienceHTML) {
+                console.log("the element does exist");
+
+                // Reset le contenu de l'élément
+                resilienceHTML.innerHTML = ''; // Cette ligne supprime tout contenu existant
+
+                resilienceHTML.style.display = "flex";
+                resilienceHTML.style.alignItems = "center";
+                resilienceHTML.style.justifyContent = "center";
+                resilienceHTML.style.width = "100%";
+                resilienceHTML.style.height = "30px";
+                resilienceHTML.style.marginTop = "15px";
+                resilienceHTML.style.backgroundColor = "#ffffff";
+
+                // Ajoutez le nouveau contenu. Utilisez `=` au lieu de `+=` pour ne pas ajouter au contenu existant.
+                resilienceHTML.innerHTML = isResilient;
+
+            } else {
+                console.log("the element does not exist");
+            }
+
+        }
+
+        function handleDataChangeResilience(dict){
+            displayResilience();
+        }
+
+    </script>
+
+</div>

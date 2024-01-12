@@ -11,9 +11,11 @@ var dictDataPerLevel = {};  // Recupère sessionFragmentedByLevel et restructure
 
 
 
+
+
+
 //Partage de données
 const dataChangeEvent = new CustomEvent('dataChange', { detail: dictDataPerLevel });
-
 function updateDictData() {
   Object.assign(dictDataPerLevel, dictDataPerLevel);
   document.dispatchEvent(dataChangeEvent);
@@ -54,9 +56,7 @@ function searchStudent() {
 function dataByLevel(){
 	console.log("dataByLevel")
 	query(myTinCan, "all", [filterDataByLevelsPlayed, filterDataByUniqueLevel, displayProgressionBar, updateDictData], sessionDataAll,  idStudent)
-
 }
-
 
 //Display functions
 function displayProgressionBar(){
@@ -92,20 +92,23 @@ function displayProgressionBar(){
 	let progressionHTML;
 	progressionHTML = document.getElementById("barreDeProgression");
 	//progressionHTML.innerHTML += "salut";
+	progressionHTML.innerHTML = '';
 	progressionHTML.style.width = "100%" ;
 	progressionHTML.style.height = "20px";
 	progressionHTML.style.backgroundColor = "#ffffff";
 	progressionHTML.style.marginTop = "10px";
 
-    var progressBar = document.createElement("div");
+    var progressBar = progressionHTML.createElement("div");
+	progressBar.innerHTML = '';
     progressBar.style.width = percentage + "%";
     progressBar.style.height = "20px"; // Ajuster la hauteur selon tes besoins
     progressBar.style.backgroundColor = "#4CAF50"; // Couleur verte (ajuster selon tes besoins)
     progressBar.style.marginTop = "10px"; // Ajuster la marge selon tes besoins
 
 	var progressBarTxt = document.createElement("div");
-	progressBarTxt.innerHTML += currentValue+"/"+maxValue;
-	progressBarTxt.style.marginTop = "7px";
+	progressBarTxt.innerHTML = '';
+	//progressBarTxt.innerHTML += currentValue+"/"+maxValue;
+	//progressBarTxt.style.marginTop = "7px";
 
 	progressionHTML.appendChild(progressBar);
 	progressionHTML.appendChild(progressBarTxt);
@@ -262,6 +265,7 @@ function query(myTinCan, verbe, functionsToCall = null, dataStorage = [], idStud
 window.onload = function(){
 	// récupération de la balise result
 	htmlOutput = document.getElementById("result");
+	htmlOutput.innerHTML = '';
 	try{
 	  myTinCan = new TinCan();
 	  myTinCan.lrs = new TinCan.LRS(

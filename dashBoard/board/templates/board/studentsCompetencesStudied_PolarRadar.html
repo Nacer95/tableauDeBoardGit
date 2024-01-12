@@ -60,11 +60,6 @@
 <figure class="highcharts-figure">
     <div id="polar">
         <script>
-
-            document.addEventListener('dataChange',function() {
-                console.log("Success Polar Radar")
-                handleDataChangePolar(event.detail); });
-
             const conceptsPerLevel = {
                 '0 - tutoriel': {'tutoriel':[]},
                 '1 - explorateur':{
@@ -111,7 +106,53 @@
                     'niveau07':['boucles', 'conditions', 'negation', 'parallélisme', 'Généricité', ],
                     'niveau08':['boucles', 'conditions', 'negation', 'instructionsEnCode']},
             };
-            const starsPerConcept = {
+            const starsPerLevel = {
+                '0 - tutoriel': {'tutoriel':[0,0]},
+                '1 - explorateur':{
+                    'niveau01':[15500, 0],
+                    'niveau02':[12999, 0],
+                    'niveau03':[11750, 10750],
+                    'niveau04':[10499, 9499],
+                    'niveau05':[9875, 8875],
+                    'niveau06':[9249, 8249],
+                    'niveau07':[9153, 8153],
+                    'niveau08':[8882, 7882],
+                    'niveau09':[0, 0]},
+                '2 - collaborateur':{
+                    'niveau01':[15678, 14678],
+                    'niveau02':[14483, 13483],
+                    'niveau03':[13930, 12930],
+                    'niveau04':[14026, 12930],
+                    'niveau05':[14143, 13703],
+                    'niveau06':[13524, 0],
+                    'niveau07':[13784, 0],
+                    'niveau08':[14143, 13143],
+                    'niveau09':[0, 0],
+                    'niveau10':[0, 0],
+                    'niveau11':[0, 0],
+                    'niveau12':[0, 0]},
+                '3 - repetiteur':{
+                    'niveau01':[9875, 8875],
+                    'niveau02':[11888, 0],
+                    'niveau03':[10050, 0],
+                    'niveau04':[9655, 0],
+                    'niveau05':[10250, 0],
+                    'niveau06':[5416, 5384],
+                    'niveau07':[9468, 9357],
+                    'niveau08':[8504, 5480],
+                    'niveau09':[0, 0],
+                    'niveau10':[0, 0]},
+                '4 - selectionneur':{
+                    'niveau01':[4527, 4500],
+                    'niveau02':[0, 0],
+                    'niveau03':[0, 0],
+                    'niveau04':[0, 0],
+                    'niveau05':[0, 0],
+                    'niveau06':[0, 0],
+                    'niveau07':[0, 0],
+                    'niveau08':[0, 0]},
+            };
+            var starsPerConcept = {
                 'connecteursLogiques':0,
                 'boucles':0,
                 'conditions':0,
@@ -122,16 +163,39 @@
                 'priseEnMain':0,
 
             };
-            const competencesScores = [];
+            var competencesScores = [];
 
+            const dataChangeEventScore = new CustomEvent('dataChangeScore', { detail: dictDataPerLevel, starsPerConcept });
+            function updateStarsPerConcept() {
+                Object.assign(dictDataPerLevel, dictDataPerLevel);
+                Object.assign(starsPerConcept, starsPerConcept)
+                document.dispatchEvent(dataChangeEventScore);
+            }
 
+            document.addEventListener('dataChange',function() {
+                console.log("Success Polar Radar")
+                handleDataChangePolar(event.detail); });
+
+            function extractFrenchLevel(levelString) {
+                const frenchPattern = /\[fr\](.*?)\[\/fr\]/;
+                const match = frenchPattern.exec(levelString);
+
+                if (match && match[1]) {
+                    return match[1]; // Returns the French level
+                } else {
+                    return levelString; // Returns the original string if pattern not found
+                }
+            }
             function getCompetencesScores() {
                 for (let key_context in dictDataPerLevel) {
-                    //console.log(key_context);
+                    console.log(key_context);
                     for (let key_level in dictDataPerLevel[key_context]) {
                         let maxScore = 0;
-                        //console.log(key_level);
+                        //key_level = extractFrenchLevel(key_level);
+                        console.log(key_level);
                         let sessionFragmentedByLevel = dictDataPerLevel[key_context][key_level];
+                        console.log("=============================================================================== 1");
+                         console.log(dictDataPerLevel);
                         if (sessionFragmentedByLevel) {
                             // dans les répétitions d'un même niveau
                             for (let j = 0; j < sessionFragmentedByLevel.length; j++) {
@@ -140,23 +204,63 @@
                                 let l_length = sessionDataLevelRepetition.length-1;
                                 if (sessionDataLevelRepetition[l_length].verb.id === "http://adlnet.gov/expapi/verbs/completed"){
                                     let score = sessionDataLevelRepetition[l_length].result.extensions['https://spy.lip6.fr/xapi/extensions/score'];
+                                    console.log("=============================================================================== 2");
+                                    console.log(score);
                                     if (score!=undefined){
                                         let score_int = parseInt(score[0], 10);
-                                        if (score>maxScore){maxScore=score_int; }
+                                        if (score_int > maxScore){maxScore = score_int; }
                                     }
-
                                 }
                             }
-                            let competencesListForTheCurrentLevel = conceptsPerLevel[key_context][key_level];
-                            for (let k = 0; k<competencesListForTheCurrentLevel.length; k++){
-                                let competence = competencesListForTheCurrentLevel[k];
+                            let competencesListForTheCurrentLevel;
+                            let erreur = false;
+                            try{
+                                key_level = extractFrenchLevel(key_level);
+                                key_context = extractFrenchLevel(key_context);
+                                competencesListForTheCurrentLevel = conceptsPerLevel[key_context][key_level];
+                            }catch{
+                                erreur = true;
+                                console.log("mkjbqjvkmjbqjkbvqubvbsdqnvbuparbgmrubgaêrbvafjkbvjkqfbviubraek");
+                                console.log(key_context+" "+key_level);
+                            }
+                            if (!erreur && competencesListForTheCurrentLevel && competencesListForTheCurrentLevel.length ){
+                                for (let k = 0; k<competencesListForTheCurrentLevel.length; k++){
+                                    let competence = competencesListForTheCurrentLevel[k];
+                                    if (competence in starsPerConcept){
+                                        //convert maxScore to stars then to 20
+                                        let maxScore_on20 = 0;
+                                        let old_mean = starsPerConcept[competence];
+                                        let new_mean = 0;
+                                        let convert_maxScore = 0;
+                                        let starsLevel = starsPerLevel[key_context][key_level];
+                                        if (maxScore < starsLevel[0]){
+                                            if (maxScore < starsLevel[1]){
+                                                convert_maxScore = 1;
+                                                maxScore_on20 = (convert_maxScore*20.0)/3.0;
+                                            }else{
+                                                convert_maxScore = 2;
+                                                maxScore_on20 = (convert_maxScore*20.0)/3.0;
+                                            }
+                                        }else {
+                                            convert_maxScore = 3;
+                                            maxScore_on20 = (convert_maxScore*20.0)/3.0;
+                                        }
 
-                                if (competence in starsPerConcept){
-                                    starsPerConcept[competence] = starsPerConcept[competence]+maxScore;
+                                        if (old_mean > 0){
+                                            new_mean = (old_mean + maxScore_on20)/2.0;
+                                        }else{
+                                            new_mean = maxScore_on20;
+                                        }
+
+                                        starsPerConcept[competence] = new_mean;
+                                    }
+                                    else {
+                                        console.log("La compétence", competence, "n'existe pas dans le dictionnaire.");
+                                    }
                                 }
-                                else {
-                                    console.log("La compétence", competence, "n'existe pas dans le dictionnaire.");
-                                }
+                            }else {
+                                continue;
+                                console.log("erreur");
                             }
                         }
                     }
@@ -165,7 +269,8 @@
                 for (let competence in starsPerConcept){
                     competencesScores.push(starsPerConcept[competence]);
                 }
-                //console.log(competencesScores);
+
+                console.log(competencesScores);
             }
             function displayChart(){
                 Highcharts.chart('polar', {
@@ -203,7 +308,8 @@
                 },
 
                 yAxis: {
-                    min: 0
+                    min: 0,
+                    max: 20
                 },
 
                 plotOptions: {
@@ -224,10 +330,21 @@
                 }]
             });
             }
+            async function handleDataChangePolar(){
+                starsPerConcept = {
+                'connecteursLogiques':0,
+                'boucles':0,
+                'conditions':0,
+                'negation':0,
+                'comprehensionDeCode':0,
+                'parallélisme':0,
+                'nommage':0,
+                'priseEnMain':0,
 
-
-            function handleDataChangePolar(){
-                getCompetencesScores();
+            };
+                competencesScores = [];
+                await getCompetencesScores();
+                updateStarsPerConcept();
                 displayChart();
             }
 

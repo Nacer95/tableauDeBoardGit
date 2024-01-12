@@ -74,8 +74,6 @@ function displayProgressionBar(){
 
 	}
 
-
-
 	sessionData = sessionDataProgressionBar;
 	console.log("displayProgressionBar");
 	let maxValue = 50;
@@ -84,7 +82,7 @@ function displayProgressionBar(){
 	let progressionHTML;
 	progressionHTML = document.getElementById("barreDeProgression");
 	//progressionHTML.innerHTML += "salut";
-	progressionHTML.style.width = "100%" ;
+	progressionHTML.style.width = "100%";
 	progressionHTML.style.height = "20px";
 	progressionHTML.style.backgroundColor = "#ffffff";
 	progressionHTML.style.marginTop = "10px";

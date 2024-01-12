@@ -1,10 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<div>
+    <script>
+        document.addEventListener('dataChangeScore',function() {
+                console.log("Success Competence To restudy");
+                handleDataChangeCompetenceToRestudy(event.detail); });
 
-</body>
-</html>
+
+        let conceptToRestudy;
+
+        function getCompetencesScores2() {
+                for (let key_context in dictDataPerLevel) {
+                    //console.log(key_context);
+                    for (let key_level in dictDataPerLevel[key_context]) {
+                        let maxScore = 0;
+                        //console.log(key_level);
+                        let sessionFragmentedByLevel = dictDataPerLevel[key_context][key_level];
+                        if (sessionFragmentedByLevel) {
+                            // dans les répétitions d'un même niveau
+                            for (let j = 0; j < sessionFragmentedByLevel.length; j++) {
+                                //récupérer la meilleure tentative
+                                let sessionDataLevelRepetition = sessionFragmentedByLevel[j];
+                                let l_length = sessionDataLevelRepetition.length-1;
+                                if (sessionDataLevelRepetition[l_length].verb.id === "http://adlnet.gov/expapi/verbs/completed"){
+                                    let score = sessionDataLevelRepetition[l_length].result.extensions['https://spy.lip6.fr/xapi/extensions/score'];
+                                    if (score!=undefined){
+                                        let score_int = parseInt(score[0], 10);
+                                        if (score_int > maxScore){maxScore = score_int; }
+                                    }
+                                }
+                            }
+                            let competencesListForTheCurrentLevel = conceptsPerLevel[key_context][key_level];
+                            for (let k = 0; k<competencesListForTheCurrentLevel.length; k++){
+                                let competence = competencesListForTheCurrentLevel[k];
+                                if (competence in starsPerConcept){
+                                    starsPerConcept[competence] = starsPerConcept[competence]+maxScore;
+                                }
+                                else {
+                                    console.log("La compétence", competence, "n'existe pas dans le dictionnaire.");
+                                }
+                            }
+                        }
+                    }
+                }
+                console.log(starsPerConcept);
+                for (let competence in starsPerConcept){
+                    competencesScores.push(starsPerConcept[competence]);
+                }
+                //console.log(competencesScores);
+            }
+
+        function getCompetenceToRestudy(){
+            // Sélectionner une compétence dont le score est le minimum des scores strictement supérieur à zéro
+            let minScore = Infinity;
+            // Parcourir le dictionnaire
+            for (const concept in starsPerConcept) {
+                const score = starsPerConcept[concept];
+
+                // Vérifier si le score est strictement supérieur à zéro
+                if (score > 0 && score < minScore) {
+                  minScore = score;
+                  conceptToRestudy = concept;
+                }
+            }
+        }
+
+        function displayConceptToRestudy(){
+            let conceptToRestudyHTML;
+            conceptToRestudyHTML = document.getElementById("barreConceptToRestudy");
+            if (conceptToRestudyHTML) {
+
+                console.log("the element does exist");
+                //conceptToRestudyHTML.innerHTML += "salut";
+                conceptToRestudyHTML.innerHTML = '';
+                conceptToRestudyHTML.style.display = "flex";
+                conceptToRestudyHTML.style.alignItems = "center";
+                conceptToRestudyHTML.style.justifyContent = "center";
+                conceptToRestudyHTML.style.width = "100%" ;
+                conceptToRestudyHTML.style.height = "30px";
+                conceptToRestudyHTML.style.marginTop = "15px";
+                conceptToRestudyHTML.style.backgroundColor = "#ffffff";
+                conceptToRestudyHTML.innerHTML += conceptToRestudy;
+            } else {
+                console.log("the element does not exist");
+            }
+
+        }
+
+       function handleDataChangeCompetenceToRestudy(){
+           // getCompetencesScores2();
+           getCompetenceToRestudy();
+           displayConceptToRestudy();
+           console.log("Restudy =======");
+           console.log(starsPerConcept);
+        }
+    </script>
+</div>

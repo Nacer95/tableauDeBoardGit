@@ -11,7 +11,7 @@
   <div id="partie-haute">
           <div id="partie-1">
               <div id="result">
-                <script type="text/javascript" src="{% static 'board/js/data4.js' %}"></script>
+                <script type="text/javascript" src="{% static 'board/js/data5.js' %}"></script>
               </div>
                 <a href="{% url 'classBoard' %}">
                      board per class
@@ -24,7 +24,7 @@
             <div id="barre-recherche">
                 <input type="text" placeholder="Recherche..." id="studentIdInput">
                 <button onclick="searchStudent()">search</button>
-                <button>students</button>
+                <button onclick="activateClassWindow()">students</button>
                 <button>reset</button>
                 <button>add</button>
             </div>
@@ -33,8 +33,17 @@
             </div>
         </div>
         <div id="partie-3">
-            <div class="container_p3">Résilience de l'étudiant</div>
-            <div class="container_p3">Compétence à travailler </div>
+            <div class="container_p3">Résilience de l'étudiant
+                {% include 'board/studentsResilience_text.html' %}
+                <div id="barreDeResilience">
+                </div>
+            </div>
+            <div class="container_p3">Compétence à travailler
+                {% include 'board/studentsConceptsToRestudy_text.html' %}
+                <div id="barreConceptToRestudy">
+                </div>
+            </div>
+
             <div class="container_p3">Barre de progression
                 <div id="barreDeProgression">
                 </div>

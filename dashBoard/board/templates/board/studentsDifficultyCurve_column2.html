@@ -106,17 +106,11 @@
         <script>
             let difficultyCurvePlayer;
             let difficultyCurveMean ;
-            let studentsClass = ["93655853", "C1E0F8B9"]; // This should be populated with actual student IDs
+            let studentsClass = ['93655853']; // This should be populated with actual student IDs
 
             document.addEventListener('dataChangeDicClassPerLevel',function() {
                 console.log("Success Difficulty column")
                 handleDataChangeDifficulty(event.detail); });
-
-            //Partage de données
-            const studentClassChange = new CustomEvent('eventStudentClassChange', { detail: {studentsClass:studentsClass }});
-            function updateStudentsClass() {
-                    document.dispatchEvent(studentClassChange);
-            }
 
             function getLevePerformancePlayer(dictDataPerLevelPlayerCSV){
                     let dicLevelPerformance = {};
@@ -206,20 +200,15 @@
                                             let l_lenght = sessionDataLevelRepetition.length -1;
                                             //console.log("sessionDataLevelRepetition[l_lenght] player No CSV "+sessionDataLevelRepetition[l_lenght]);
                                             levelSucceeded = (sessionDataLevelRepetition[l_lenght].verb.id === "http://adlnet.gov/expapi/verbs/completed");
-
+                                            const dateA = new Date(sessionDataLevelRepetition[0].timestamp);
+                                            const dateB = new Date(sessionDataLevelRepetition[l_lenght].timestamp);
+                                            const differenceInMillis_A = dateB - dateA;
+                                            const differenceInSeconds_A = differenceInMillis_A / 1000;
+                                            timeSpentOnLevel += differenceInSeconds_A;
                                         }
                                         if(levelSucceeded){
-                                            let l_lenght = sessionDataLevelRepetition.length -1;
-                                            let resultObject = sessionDataLevelRepetition[l_lenght].result;
-                                            if(resultObject!= null && resultObject.success){
-                                                const dateA = new Date(sessionDataLevelRepetition[0].timestamp);
-                                                const dateB = new Date(sessionDataLevelRepetition[l_lenght].timestamp);
-                                                const differenceInMillis_A = dateB - dateA;
-                                                const differenceInSeconds_A = differenceInMillis_A / 1000;
-                                                timeSpentOnLevel += differenceInSeconds_A;
-                                                //console.log("timeSpentOnLevel : "+timeSpentOnLevel);
-                                                //console.log("numberOfRepetition : "+numberOfRepetition);
-                                            }
+                                            //console.log("timeSpentOnLevel : "+timeSpentOnLevel);
+                                            //console.log("numberOfRepetition : "+numberOfRepetition);
                                         }
                                     }
                                 }
@@ -433,7 +422,7 @@
                                     }
                                 }
                                 reactionTimePerLevelMean = Math.abs(reactionTimePerLevel / sessionFragmentedByLevel.length);
-
+                                
                                 //console.log("mean "+ reactionTimePerLevelMean);
                                 /*
                                 * Enregistrer les données
@@ -470,23 +459,20 @@
                     return difficultyCurve;
                 }
             function calculateAverage(list1, list2) {
-                const maxLength = Math.max(list1.length, list2.length);
-                const result = new Array(maxLength).fill(0);
-
-                for (let i = 0; i < maxLength; i++) {
-                    if (i < list1.length && i < list2.length) {
-                        result[i] = (list1[i] + list2[i]) / 2;
-                    } else if (i < list1.length) {
-                        result[i] = list1[i];
-                    } else if (i < list2.length) {
-                        result[i] = list2[i];
+                let averages = [];
+                if (list1.length !== list2.length) {
+                    averages = list2;
+                } else {
+                    for (let i = 0; i < list1.length; i++) {
+                        let average = (list1[i] + list2[i]) / 2.0;
+                        averages.push(average);
                     }
                 }
-
-                return result;
+                console.log(averages);
+                return averages;
             }
             function getLevePerformanceClass(ClassPlayersGameID){
-                //alert("update class level difficulty");
+                alert("update class level difficulty");
                 var difficultyCurveMean = [];
                 let PlayerGameID;
                 let difficultyCurvePlayer;
@@ -508,7 +494,7 @@
                         continue;
                     }
                 }
-                //alert(difficultyCurveMean);
+                alert(difficultyCurveMean);
                 return difficultyCurveMean;
             }
             function displayDataChange(difficultyCurve, difficultyCurveMean){
@@ -579,6 +565,7 @@
                     }]
                 });
             };
+
             // Function to retrieve the list of students
             function getStudents() {
                 // This function would normally make an API call to retrieve the students
@@ -607,6 +594,7 @@
                 studentsClass.splice(index, 1);
                 displayStudents(); // Refresh the list on the page
             }
+
             // Function to add a new student
             function addStudent() {
                 const studentNumberInput = document.getElementById('studentNumberInput').value;
@@ -633,18 +621,14 @@
 
             span.onclick = async function() {
                 modal.style.display = 'none';
-                alert(studentsClass);
                 difficultyCurveMean = await getLevePerformanceClass(studentsClass);
-                updateStudentsClass();
                 displayDataChange(difficultyCurvePlayer, difficultyCurveMean);
             }
 
             window.onclick = async function(event) {
                 if (event.target === modal) {
                     modal.style.display = 'none';
-                    alert(studentsClass);
                     difficultyCurveMean = await getLevePerformanceClass(studentsClass);
-                    updateStudentsClass();
                     displayDataChange(difficultyCurvePlayer, difficultyCurveMean);
                 }
             }
@@ -659,12 +643,12 @@
 
 
             async function handleDataChangeDifficulty(dict){
-                //console.log("palyer  93655853 ========"); console.log(dictDataPerLevel);
+                console.log("palyer  93655853 ========"); console.log(dictDataPerLevel);
                 difficultyCurvePlayer = await getLevePerformancePlayer(dictDataPerLevel);
                 difficultyCurveMean = await getLevePerformanceClass(studentsClass);
                 displayDataChange(difficultyCurvePlayer, difficultyCurveMean);
-                //console.log(difficultyCurvePlayer);
-                //console.log(difficultyCurveMean)
+                console.log(difficultyCurvePlayer);
+                console.log(difficultyCurveMean)
             }
 
 
