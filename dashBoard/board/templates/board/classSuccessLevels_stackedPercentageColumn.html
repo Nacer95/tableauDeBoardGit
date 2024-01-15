@@ -89,7 +89,7 @@ Highcharts.chart('container', {
         type: 'column'
     },
     title: {
-        text: 'UEFA CL most assists by season'
+        text: "Vue d'ensemble réussite par niveau'"
     },
     xAxis: {
         categories: int1_n(40)
@@ -97,7 +97,7 @@ Highcharts.chart('container', {
     yAxis: {
         min: 0,
         title: {
-            text: 'Assists'
+            text: "% de la classe"
         }
     },
     tooltip: {
@@ -110,13 +110,13 @@ Highcharts.chart('container', {
         }
     },
     series: [{
-        name: 'Kevin De Bruyne',
+        name: '% réussite ',
         data: int1_n_alea(40)
     }, {
-        name: 'Joshua Kimmich',
+        name: "% en cour d'acquisition",
         data: int1_n_alea(40)
     }, {
-        name: 'Sadio Mané',
+        name: '% non acquis',
         data: int1_n_alea(40)
     }]
 });

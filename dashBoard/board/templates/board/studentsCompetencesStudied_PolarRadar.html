@@ -175,7 +175,6 @@
             document.addEventListener('dataChange',function() {
                 console.log("Success Polar Radar")
                 handleDataChangePolar(event.detail); });
-
             function extractFrenchLevel(levelString) {
                 const frenchPattern = /\[fr\](.*?)\[\/fr\]/;
                 const match = frenchPattern.exec(levelString);
@@ -251,7 +250,6 @@
                                         }else{
                                             new_mean = maxScore_on20;
                                         }
-
                                         starsPerConcept[competence] = new_mean;
                                     }
                                     else {
